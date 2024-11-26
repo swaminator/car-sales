@@ -3,6 +3,10 @@ import { FeaturedCategories } from "@/components/search/featured-categories";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { Amplify } from "aws-amplify";
+import outputs from "@/amplify_outputs.json";
+
+Amplify.configure(outputs);
 
 export default function Home() {
   return (

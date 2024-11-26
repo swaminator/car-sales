@@ -22,12 +22,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SORT_OPTIONS } from "@/lib/constants";
-import type { CarListing } from "@/types/car";
+// import type { CarListing } from "@/types/car";
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '@/amplify/data/resource';
+import { Amplify } from "aws-amplify";
+import outputs from "@/amplify_outputs.json";
+import { set } from "date-fns";
+
+Amplify.configure(outputs);
+
+const client = generateClient<Schema>();
 
 // Mock data for demonstration
-const MOCK_LISTINGS: CarListing[] = [
+const MOCK_LISTINGS = [
   {
-    id: 1,
     make: "Tesla",
     model: "Model 3",
     year: 2023,
@@ -35,14 +43,13 @@ const MOCK_LISTINGS: CarListing[] = [
     mileage: 12000,
     location: "San Francisco, CA",
     image: "https://images.unsplash.com/photo-1536700503339-1e4b06520771?auto=format&fit=crop&q=80&w=500",
-    fuelType: "Electric",
-    transmission: "Automatic",
-    bodyType: "Sedan",
+    fuelType: "ELECTRIC",
+    transmission: "AUTOMATIC",
+    bodyType: "SEDAN",
     exteriorColor: "Red",
     vin: "ABC123XYZ"
   },
   {
-    id: 2,
     make: "BMW",
     model: "M4",
     year: 2022,
@@ -50,14 +57,13 @@ const MOCK_LISTINGS: CarListing[] = [
     mileage: 15000,
     location: "Los Angeles, CA",
     image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=500",
-    fuelType: "Gasoline",
-    transmission: "Automatic",
-    bodyType: "Coupe",
+    fuelType: "GASOLINE",
+    transmission: "AUTOMATIC",
+    bodyType: "COUPE",
     exteriorColor: "Black",
     vin: "DEF456UVW"
   },
   {
-    id: 3,
     make: "Mercedes",
     model: "C300",
     year: 2021,
@@ -65,19 +71,54 @@ const MOCK_LISTINGS: CarListing[] = [
     mileage: 28000,
     location: "New York, NY",
     image: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=500",
-    fuelType: "Gasoline",
-    transmission: "Automatic",
-    bodyType: "Sedan",
+    fuelType: "GASOLINE",
+    transmission: "AUTOMATIC",
+    bodyType: "SEDAN",
     exteriorColor: "Silver",
     vin: "GHI789RST"
   }
 ];
-
 export function SearchResults() {
   const searchParams = useSearchParams();
   const [sortBy, setSortBy] = useState("price-asc");
-  const [listings, setListings] = useState(MOCK_LISTINGS);
+  const [listings, setListings] =  useState<Array<Schema["CarListing"]["type"]>>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const query = searchParams.get("q") || "";
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      setIsLoading(true);
+      try {
+        const { data: cars, errors } = await client.models.CarListing.list({
+          filter: {
+            make: { contains: query },
+          },
+          limit: 100 // Adjust this value based on your needs
+        });
+        // update the setListings state with the listings from the API
+        setListings(cars);
+      } catch (error) {
+        console.error("Error fetching listings:", error);
+        // Handle error (e.g., show error message to user)
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchListings();
+  }, [query]);
+
+  function createMockdata() {
+    console.log("Creating mock data");
+    MOCK_LISTINGS.forEach((listing) => {
+      client.models.CarListing.create({
+        ...listing,
+        fuelType: listing.fuelType as "ELECTRIC" | "GASOLINE" | "DIESEL" | "HYBRID" | "PLUGIN_HYBRID" | "OTHER",
+        transmission: listing.transmission as "AUTOMATIC" | "MANUAL",
+        bodyType: listing.bodyType as "SEDAN" | "SUV" | "COUPE" | "TRUCK" | "VAN" | "WAGON" | "CONVERTIBLE" | "OTHER"    });
+  }, [])
+  }
 
   const handleSort = (value: string) => {
     setSortBy(value);
@@ -137,11 +178,11 @@ export function SearchResults() {
           <div className="flex gap-4">
             <Button
               variant="outline"
-              onClick={saveCurrentSearch}
+              onClick={createMockdata}
               className="flex items-center gap-2"
             >
               <BookmarkIcon className="w-4 h-4" />
-              Save Search
+              Mock data
             </Button>
             <Sheet>
               <SheetTrigger asChild>
