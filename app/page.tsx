@@ -1,14 +1,29 @@
+'use client'
+
 import { SearchInput } from "@/components/search/search-input";
 import { FeaturedCategories } from "@/components/search/featured-categories";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Amplify } from "aws-amplify";
-import outputs from "@/amplify_outputs.json";
+import { generateClient } from "aws-amplify/api";
+import { Schema } from "../amplify/data/resource";
+import { createAIHooks } from "@aws-amplify/ui-react-ai";
+import { AIConversation } from '@aws-amplify/ui-react-ai';
+import { Authenticator } from "@aws-amplify/ui-react";
 
-Amplify.configure(outputs);
+export const client = generateClient<Schema>({ authMode: "userPool" });
+export const { useAIConversation, useAIGeneration } = createAIHooks(client);
+
 
 export default function Home() {
+  const [
+    {
+      data: { messages },
+      isLoading,
+    },
+    handleSendMessage,
+  ] = useAIConversation('chat');
+
   return (
     <main>
       {/* Hero Section */}
@@ -44,7 +59,13 @@ export default function Home() {
         </h2>
         <FeaturedCategories />
       </div>
-
+      <Authenticator>
+      <AIConversation
+        messages={messages}
+        isLoading={isLoading}
+        handleSendMessage={handleSendMessage}
+      />
+    </Authenticator>
       {/* Trust Indicators */}
       <div className="bg-gray-50">
         <div className="max-w-7xl mx-auto py-16 px-6">
