@@ -4,10 +4,10 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CarCard } from "@/components/search/car-card";
 import { MapIcon, ListIcon } from "lucide-react";
-import type { CarListing } from "@/types/car";
+import type { Schema } from '@/amplify/data/resource';
 
 interface ResultsViewProps {
-  cars: CarListing[];
+  cars: Schema['CarListing']['type'];
 }
 
 export function ResultsView({ cars }: ResultsViewProps) {
@@ -36,6 +36,7 @@ export function ResultsView({ cars }: ResultsViewProps) {
 
       <TabsContent value="list" className="mt-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {console.log(cars)}
           {cars.map((car) => (
             <CarCard key={car.id} car={car} />
           ))}

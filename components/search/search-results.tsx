@@ -22,16 +22,37 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SORT_OPTIONS } from "@/lib/constants";
-// import type { CarListing } from "@/types/car";
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 import { Amplify } from "aws-amplify";
 import outputs from "@/amplify_outputs.json";
-import { set } from "date-fns";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
 
 Amplify.configure(outputs);
 
 const client = generateClient<Schema>();
+
+type Filters = {
+  make: string;
+  model: string;
+  yearMin: number;
+  yearMax: number;
+  priceMin: number;
+  priceMax: number;
+  mileageMin: number;
+  mileageMax: number;
+  location: string;
+};
+
+
 
 // Mock data for demonstration
 const MOCK_LISTINGS = [
@@ -39,6 +60,7 @@ const MOCK_LISTINGS = [
     make: "Tesla",
     model: "Model 3",
     year: 2023,
+    description: "Test",
     price: 45000,
     mileage: 12000,
     location: "San Francisco, CA",
@@ -53,6 +75,7 @@ const MOCK_LISTINGS = [
     make: "BMW",
     model: "M4",
     year: 2022,
+    description: "Test",
     price: 65000,
     mileage: 15000,
     location: "Los Angeles, CA",
@@ -67,6 +90,7 @@ const MOCK_LISTINGS = [
     make: "Mercedes",
     model: "C300",
     year: 2021,
+    description: "Test",
     price: 42000,
     mileage: 28000,
     location: "New York, NY",
@@ -83,31 +107,79 @@ export function SearchResults() {
   const [sortBy, setSortBy] = useState("price-asc");
   const [listings, setListings] =  useState<Array<Schema["CarListing"]["type"]>>([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  // Inside your component:
+  const [filters, setFilters] = useState<Filters>({
+    make: "",
+    model: "",
+    yearMin: 2010,
+    yearMax: new Date().getFullYear() + 1,
+    priceMin: 0,
+    priceMax: 100000,
+    mileageMin: 0,
+    mileageMax: 500000,
+    location: "",
+  });
   const query = searchParams.get("q") || "";
 
   useEffect(() => {
     const fetchListings = async () => {
       setIsLoading(true);
       try {
-        const { data: cars, errors } = await client.models.CarListing.list({
-          filter: {
-            make: { contains: query },
-          },
-          limit: 100 // Adjust this value based on your needs
+        const filterConditions = [];
+        
+        if (query) {
+          filterConditions.push({
+            or: [
+              { make: { contains: query } },
+              { model: { contains: query } },
+              { year: { eq: parseInt(query) || 0 } }
+            ]
+          });
+        }
+  
+        if (filters.make && filters.make !== "any") {
+          filterConditions.push({ make: { contains: filters.make } });
+        }
+        if (filters.model) {
+          filterConditions.push({ model: { contains: filters.model } });
+        }
+        if (filters.location) {
+          filterConditions.push({ location: { contains: filters.location } });
+        }
+        
+        filterConditions.push({ 
+          year: { 
+            between: [filters.yearMin, filters.yearMax] as [number, number]
+          } 
         });
-        // update the setListings state with the listings from the API
-        setListings(cars);
+        
+        filterConditions.push({ 
+          price: { 
+            between: [filters.priceMin, filters.priceMax] as [number, number]
+          } 
+        });
+        
+        filterConditions.push({ 
+          mileage: { 
+            between: [filters.mileageMin, filters.mileageMax] as [number, number]
+          } 
+        });
+        console.log("filterConditions")
+        console.log(filterConditions);
+        const {data, errors} = await client.models.CarListing.list();
+        console.log("fetchlistings")
+        console.log(errors);
+        setListings(data);
       } catch (error) {
-        console.error("Error fetching listings:", error);
-        // Handle error (e.g., show error message to user)
+        console.log("Error fetching listings:", error);
       } finally {
         setIsLoading(false);
       }
     };
-
+  
     fetchListings();
-  }, [query]);
+  }, [query, filters]);
+  
 
   function createMockdata() {
     console.log("Creating mock data");
@@ -156,6 +228,10 @@ export function SearchResults() {
       )
     : listings;
 
+    const handleFilterChange = (key: keyof Filters, value: string | number | number[]) => {
+      setFilters(prev => ({ ...prev, [key]: value }));
+    };
+    
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6">
@@ -191,14 +267,150 @@ export function SearchResults() {
                   Filters
                 </Button>
               </SheetTrigger>
-              <SheetContent>
+              <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle>Search Filters</SheetTitle>
                   <SheetDescription>
                     Refine your car search with detailed filters
                   </SheetDescription>
                 </SheetHeader>
-                {/* Filter controls would go here */}
+                
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="make-model">
+                    <AccordionTrigger>Make & Model</AccordionTrigger>
+                    <AccordionContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="make">Make</Label>
+                        <Select
+                          value={filters.make}
+                          onValueChange={(value) => handleFilterChange("make", value)}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select make" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="any">Any make</SelectItem>
+                            <SelectItem value="Tesla">Tesla</SelectItem>
+                            <SelectItem value="BMW">BMW</SelectItem>
+                            <SelectItem value="Honda">Honda</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="model">Model</Label>
+                        <Input
+                          id="model"
+                          placeholder="Enter model..."
+                          value={filters.model}
+                          onChange={(e) => handleFilterChange("model", e.target.value)}
+                        />
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="year">
+                    <AccordionTrigger>Year</AccordionTrigger>
+                    <AccordionContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="yearMin">Min Year</Label>
+                          <Input
+                            id="yearMin"
+                            type="number"
+                            min="1900"
+                            max={filters.yearMax}
+                            value={filters.yearMin}
+                            onChange={(e) => handleFilterChange("yearMin", parseInt(e.target.value))}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="yearMax">Max Year</Label>
+                          <Input
+                            id="yearMax"
+                            type="number"
+                            min={filters.yearMin}
+                            max={new Date().getFullYear() + 1}
+                            value={filters.yearMax}
+                            onChange={(e) => handleFilterChange("yearMax", parseInt(e.target.value))}
+                          />
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="price">
+                    <AccordionTrigger>Price Range</AccordionTrigger>
+                    <AccordionContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="priceMin">Min Price</Label>
+                          <Input
+                            id="priceMin"
+                            type="number"
+                            min="0"
+                            max={filters.priceMax}
+                            value={filters.priceMin}
+                            onChange={(e) => handleFilterChange("priceMin", parseInt(e.target.value))}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="priceMax">Max Price</Label>
+                          <Input
+                            id="priceMax"
+                            type="number"
+                            min={filters.priceMin}
+                            value={filters.priceMax}
+                            onChange={(e) => handleFilterChange("priceMax", parseInt(e.target.value))}
+                          />
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="mileage">
+                    <AccordionTrigger>Mileage</AccordionTrigger>
+                    <AccordionContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="mileageMin">Min Mileage</Label>
+                          <Input
+                            id="mileageMin"
+                            type="number"
+                            min="0"
+                            max={filters.mileageMax}
+                            value={filters.mileageMin}
+                            onChange={(e) => handleFilterChange("mileageMin", parseInt(e.target.value))}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="mileageMax">Max Mileage</Label>
+                          <Input
+                            id="mileageMax"
+                            type="number"
+                            min={filters.mileageMin}
+                            value={filters.mileageMax}
+                            onChange={(e) => handleFilterChange("mileageMax", parseInt(e.target.value))}
+                          />
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="location">
+                    <AccordionTrigger>Location</AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-2">
+                        <Label htmlFor="location">Location</Label>
+                        <Input
+                          id="location"
+                          placeholder="Enter location..."
+                          value={filters.location}
+                          onChange={(e) => handleFilterChange("location", e.target.value)}
+                        />
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </SheetContent>
             </Sheet>
           </div>

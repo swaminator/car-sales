@@ -10,7 +10,9 @@ const schema = a
         price: a.float().required(), // Using float for price as it may include decimals
         mileage: a.float().required(), // Using float for mileage to handle decimal values
         location: a.string().required(),
+        description: a.string(), // Added description field
         image: a.string(), // Optional image URL
+        photos: a.string().array(), // Array of photo URLs 
         fuelType: a.enum([
           "GASOLINE",
           "DIESEL",
