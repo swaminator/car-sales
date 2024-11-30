@@ -20,6 +20,7 @@ export default function Home() {
     {
       data: { messages },
       isLoading,
+      hasError
     },
     handleSendMessage,
   ] = useAIConversation('chat');
@@ -60,12 +61,12 @@ export default function Home() {
         <FeaturedCategories />
       </div>
       <Authenticator>
-      <AIConversation
-        messages={messages}
-        isLoading={isLoading}
-        handleSendMessage={handleSendMessage}
-      />
-    </Authenticator>
+        <AIConversation
+          messages={messages}
+          isLoading={isLoading}
+          handleSendMessage={handleSendMessage}
+        />
+      </Authenticator>
       {/* Trust Indicators */}
       <div className="bg-gray-50">
         <div className="max-w-7xl mx-auto py-16 px-6">
