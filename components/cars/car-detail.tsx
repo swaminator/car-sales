@@ -61,7 +61,7 @@ export function CarDetail({ car }: CarDetailProps) {
             </h1>
             <div className="flex items-center gap-2 mt-2">
               <Badge variant="secondary">{car.bodyType}</Badge>
-              <Badge variant="outline">{car.vin}</Badge>
+              <Badge variant="outline">{car.location}</Badge>
             </div>
           </div>
         </div>
@@ -70,10 +70,16 @@ export function CarDetail({ car }: CarDetailProps) {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Photo Gallery */}
-            <PhotoGallery photos={car.photos} />
+            {/* <PhotoGallery photos={car.photos} /> */}
 
             {/* Vehicle Highlights */}
             <div>
+            <img 
+              src={car.image} 
+              alt={`${car.year} ${car.make} ${car.model}`}
+              className="w-full h-full object-cover"
+            />
+          <br />
               <h2 className="text-2xl font-semibold mb-4">Vehicle Highlights</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {highlights.map((item) => (
