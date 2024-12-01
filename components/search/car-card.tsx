@@ -3,9 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Fuel, Calendar, Gauge } from "lucide-react";
 import type { CarListing } from "@/types/car";
-
+import type {Schema} from '@/amplify/data/resource';
 interface CarCardProps {
-  car: CarListing;
+  car: Schema["CarListing"]["type"];
 }
 
 export function CarCard({ car }: CarCardProps) {

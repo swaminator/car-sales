@@ -24,60 +24,44 @@ import {
 import { SORT_OPTIONS } from "@/lib/constants";
 import type { CarListing } from "@/types/car";
 
-// Mock data for demonstration
-const MOCK_LISTINGS: CarListing[] = [
-  {
-    id: 1,
-    make: "Tesla",
-    model: "Model 3",
-    year: 2023,
-    price: 45000,
-    mileage: 12000,
-    location: "San Francisco, CA",
-    image: "https://images.unsplash.com/photo-1536700503339-1e4b06520771?auto=format&fit=crop&q=80&w=500",
-    fuelType: "Electric",
-    transmission: "Automatic",
-    bodyType: "Sedan",
-    exteriorColor: "Red",
-    vin: "ABC123XYZ"
-  },
-  {
-    id: 2,
-    make: "BMW",
-    model: "M4",
-    year: 2022,
-    price: 65000,
-    mileage: 15000,
-    location: "Los Angeles, CA",
-    image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=500",
-    fuelType: "Gasoline",
-    transmission: "Automatic",
-    bodyType: "Coupe",
-    exteriorColor: "Black",
-    vin: "DEF456UVW"
-  },
-  {
-    id: 3,
-    make: "Mercedes",
-    model: "C300",
-    year: 2021,
-    price: 42000,
-    mileage: 28000,
-    location: "New York, NY",
-    image: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=500",
-    fuelType: "Gasoline",
-    transmission: "Automatic",
-    bodyType: "Sedan",
-    exteriorColor: "Silver",
-    vin: "GHI789RST"
-  }
-];
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '@/amplify/data/resource';
+import { Amplify } from "aws-amplify";
+import outputs from "@/amplify_outputs.json";
+
+// Configure Amplify
+Amplify.configure(outputs);
+const client = generateClient<Schema>();
 
 export function SearchResults() {
   const searchParams = useSearchParams();
   const [sortBy, setSortBy] = useState("price-asc");
-  const [listings, setListings] = useState(MOCK_LISTINGS);
+  const [listings, setListings] = useState<Array<Schema["CarListing"]["type"]>>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const query = searchParams.get("q") || "";
+
+  
+  useEffect(() => {
+    const fetchListings = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch all car listings
+        const {data, errors} = await client.models.CarListing.list();
+        
+        setListings(data);
+        // console log  if there is an error in returning the list data from CarListing.list()
+        if (errors) {
+          console.log("Error fetching listings:", errors);
+        }
+      } catch (error) {
+        console.error("Error fetching listings:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchListings();
+  }, []); // Empty dependency array means this runs once on component mount
 
   const handleSort = (value: string) => {
     setSortBy(value);
@@ -115,71 +99,106 @@ export function SearchResults() {
       )
     : listings;
 
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="flex justify-between items-center mb-8">
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <Link href="/">
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-              </Link>
-              <h1 className="text-4xl font-bold text-gray-900">
-                {query ? `Results for "${query}"` : "All Vehicles"}
-              </h1>
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto p-6">
+          <div className="flex justify-between items-center mb-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <Link href="/">
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                </Link>
+                <h1 className="text-4xl font-bold text-gray-900">
+                  {query ? `Results for "${query}"` : "All Vehicles"}
+                </h1>
+              </div>
+              <p className="text-muted-foreground">
+                {isLoading ? "Loading..." : `${filteredListings.length} vehicles found`}
+              </p>
             </div>
-            <p className="text-muted-foreground">
-              {filteredListings.length} vehicles found
-            </p>
+    
+            <div className="flex gap-4">
+              <Button
+                variant="outline"
+                onClick={saveCurrentSearch}
+                className="flex items-center gap-2"
+              >
+                <BookmarkIcon className="w-4 h-4" />
+                Save Search
+              </Button>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <SlidersHorizontalIcon className="w-4 h-4" />
+                    Filters
+                  </Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Search Filters</SheetTitle>
+                    <SheetDescription>
+                      Refine your car search with detailed filters
+                    </SheetDescription>
+                  </SheetHeader>
+                  {/* Filter controls would go here */}
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
-          <div className="flex gap-4">
-            <Button
-              variant="outline"
-              onClick={saveCurrentSearch}
-              className="flex items-center gap-2"
-            >
-              <BookmarkIcon className="w-4 h-4" />
-              Save Search
-            </Button>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <SlidersHorizontalIcon className="w-4 h-4" />
-                  Filters
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Search Filters</SheetTitle>
-                  <SheetDescription>
-                    Refine your car search with detailed filters
-                  </SheetDescription>
-                </SheetHeader>
-                {/* Filter controls would go here */}
-              </SheetContent>
-            </Sheet>
-          </div>
+    
+          {isLoading ? (
+            <div className="flex justify-center items-center min-h-[400px]">
+              <div className="flex flex-col items-center gap-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                <p className="text-muted-foreground">Loading vehicles...</p>
+              </div>
+            </div>
+          ) : listings.length === 0 ? (
+            <div className="flex justify-center items-center min-h-[400px]">
+              <div className="text-center">
+                <p className="text-lg text-muted-foreground">No vehicles found</p>
+                <p className="text-sm text-muted-foreground">
+                  Try adjusting your search criteria
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-end mb-6">
+                <Select value={sortBy} onValueChange={handleSort}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SORT_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+    
+              <div className="grid gap-6">
+                {filteredListings.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-lg text-muted-foreground">
+                      No results found for {query}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Try searching with different terms
+                    </p>
+                  </div>
+                ) : (
+                  <ResultsView cars={filteredListings} />
+                )}
+              </div>
+            </>
+          )}
         </div>
-
-        <div className="flex justify-end mb-6">
-          <Select value={sortBy} onValueChange={handleSort}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              {SORT_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <ResultsView cars={filteredListings} />
       </div>
-    </div>
-  );
+    );
+    
 }

@@ -4,10 +4,11 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CarCard } from "@/components/search/car-card";
 import { MapIcon, ListIcon } from "lucide-react";
-import type { CarListing } from "@/types/car";
+// import type { CarListing } from "@/types/car";
+import type {Schema} from '@/amplify/data/resource';
 
 interface ResultsViewProps {
-  cars: CarListing[];
+  cars: Schema["CarListing"]["type"][];
 }
 
 export function ResultsView({ cars }: ResultsViewProps) {
