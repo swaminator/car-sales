@@ -25,13 +25,11 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import type { CarListing } from "@/types/car";
-
+import type { Schema } from '@/amplify/data/resource';
 interface CarDetailProps {
-  car: CarListing & {
-    description: string;
-    photos: string[];
-  };
-}
+  car: Schema["CarListing"]["type"];
+  }
+
 
 export function CarDetail({ car }: CarDetailProps) {
   const [showContactDialog, setShowContactDialog] = useState(false);
@@ -74,11 +72,9 @@ export function CarDetail({ car }: CarDetailProps) {
 
             {/* Vehicle Highlights */}
             <div>
-            <img 
-              src={car.image} 
-              alt={`${car.year} ${car.make} ${car.model}`}
-              className="w-full h-full object-cover"
-            />
+          <img 
+            src={car?.image || ""}  
+          />
           <br />
               <h2 className="text-2xl font-semibold mb-4">Vehicle Highlights</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

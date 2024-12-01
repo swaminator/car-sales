@@ -36,7 +36,8 @@ const schema = a
           "WAGON",
           "CONVERTIBLE",
           "OTHER"
-        ])
+        ]),
+        exteriorColor: a.string(),
       })
       .authorization(allow => [
         allow.guest().to(["read"]),
