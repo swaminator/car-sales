@@ -44,6 +44,20 @@ const schema = a
         allow.authenticated('identityPool').to(["read"]),
       allow.owner()
     ]),
+      
+  chat: a.conversation({
+    aiModel: a.ai.model('Claude 3.5 Sonnet'),
+    systemPrompt: 'You are a helpful assistant',
+    tools: [
+      a.ai.dataTool({
+        model: a.ref("CarListing"),
+        modelOperation: "list",
+        name: "CarListing",
+        description: "Used to search for car listings",
+      })
+    ],
+  })
+  .authorization((allow) => allow.owner()),
   });
 
 export type Schema = ClientSchema<typeof schema>;
