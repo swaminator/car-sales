@@ -6,22 +6,25 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main>
+    <main className="bg-background">
       {/* Hero Section */}
-      <div 
-        className="min-h-[70vh] relative flex items-center justify-center bg-cover bg-center"
-        style={{
-          backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=1920")',
-        }}
-      >
-        <div className="text-center space-y-8 p-6">
-          <h1 className="text-4xl md:text-6xl font-bold text-white max-w-4xl mx-auto">
+      <section className="relative isolate min-h-[70vh] overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-20 bg-hero-pattern bg-cover bg-center"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 bg-black/60"
+        />
+        <div className="relative z-10 mx-auto flex h-full w-full max-w-4xl flex-col items-center justify-center space-y-8 px-6 py-24 text-center text-white">
+          <h1 className="text-4xl font-bold md:text-6xl">
             Find Your Dream Car Today
           </h1>
-          <p className="text-xl text-gray-200 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-200">
             Search through thousands of cars from trusted dealers across the country
           </p>
-          <div className="max-w-2xl mx-auto">
+          <div className="w-full max-w-2xl">
             <SearchInput />
           </div>
           <Link href="/search" className="inline-block">
@@ -31,7 +34,7 @@ export default function Home() {
             </Button>
           </Link>
         </div>
-      </div>
+      </section>
 
       {/* Featured Categories */}
       <div className="max-w-7xl mx-auto py-16 px-6">
