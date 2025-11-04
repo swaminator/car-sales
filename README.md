@@ -132,3 +132,7 @@ interface CarListing {
 - Tailwind CSS
 - shadcn/ui components
 - Lucide React icons
+
+## Styling
+
+The interface leans entirely on Tailwind CSS utilities and tokens. Global styles are confined to Tailwind layers, while view-specific treatments (like the hero imagery) are handled via utility classes (`bg-hero-pattern`, overlays, typography helpers) instead of custom CSS files or inline styles.
