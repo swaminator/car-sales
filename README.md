@@ -1,89 +1,45 @@
-# Car Sales App Documentation
+# Car Sales App
 
 ## Overview
-A modern car sales application built with Next.js, TypeScript, and shadcn/ui. The app allows users to search, filter, and browse vehicle listings with a clean, professional interface.
+A modern car sales experience built with Next.js, TypeScript, Tailwind CSS, and shadcn/ui. The application allows shoppers to discover, compare, and evaluate vehicles through a polished and highly interactive interface.
 
-## Implemented Features
+## Table of Contents
+- Overview
+- Features
+- Architecture Snapshot
+- Project Structure
+- Getting Started
+- Available Scripts
+- Quality & Tooling
+- Roadmap
+- Design Principles
+- Technology Stack
 
-### 1. Search Functionality
-- **Global Search**
-  - Search by make, model, or keyword
-  - Autocomplete suggestions
-  - Popular searches
-  - Empty search support (view all vehicles)
+## Features
 
-### 2. Search Results
-- **Sorting Options**
-  - Price (Low to High/High to Low)
-  - Year (Newest/Oldest First)
-  - Mileage (Low to High/High to Low)
-  - Distance (Nearest First)
+- **Search & Discovery** – Global search by make, model, or keyword with autocomplete, search history, and curated popular searches. Empty queries fall back to a complete inventory browse.
+- **Filtering & Sorting** – Rich filters for make, model, year, price, mileage, body, fuel, and location combined with sorting options for price, year, mileage, and distance.
+- **Flexible Results Views** – Responsive list layout ready for both list and future map integrations. Sorting and view toggles are surfaced directly within the results view.
+- **Vehicle Detail Experience** – Full photo gallery with fullscreen mode, spec breakdowns, pricing insights, location details, highlights, and a long-form description.
+- **Customer Engagement Flows** – Dealer contact dialog, UI-only test drive scheduler, and save-search interactions designed for quick conversion.
+- **Navigation Continuity** – Seamless back navigation between search, results, and detail pages to keep shoppers oriented.
 
-- **View Options**
-  - List view with detailed cards
-  - Map view (placeholder for future implementation)
+## Architecture Snapshot
 
-### 3. Filtering System
-- **Available Filters**
-  - Make and Model
-  - Year Range
-  - Price Range
-  - Mileage Range
-  - Body Type
-  - Fuel Type
-  - Location
+Key UI modules that compose the experience:
 
-### 4. Vehicle Details
-- **Comprehensive Information**
-  - Photo gallery with fullscreen mode
-  - Vehicle specifications
-  - Pricing details
-  - Location information
-  - Vehicle highlights
-  - Detailed description
+1. **SearchInput** (`components/search/search-input.tsx`)
+   - Command palette–style entry with autocomplete and search history support.
+2. **ResultsView** (`components/search/results-view.tsx`)
+   - Orchestrates layout switching, responsive grid, and sort controls.
+3. **CarCard** (`components/search/car-card.tsx`)
+   - Condensed vehicle preview with key stats and hover states.
+4. **CarDetail** (`components/cars/car-detail.tsx`)
+   - Full detail page including gallery, specs, and contact actions.
+5. **PhotoGallery** (`components/cars/photo-gallery.tsx`)
+   - Carousel gallery with thumbnail navigation and fullscreen support.
 
-- **Interactive Features**
-  - Image gallery navigation
-  - Contact dealer dialog
-  - Test drive scheduling (UI only)
-  - Save search functionality (UI only)
-
-### 5. Navigation
-- Back to search from results
-- Back to results from vehicle details
-- Clear navigation paths throughout the app
-
-## Technical Implementation
-
-### Key Components
-
-1. **SearchInput (`components/search/search-input.tsx`)**
-   - Command palette style search interface
-   - Autocomplete suggestions
-   - Search history support
-
-2. **ResultsView (`components/search/results-view.tsx`)**
-   - Toggleable list/map views
-   - Responsive grid layout
-   - Sorting functionality
-
-3. **CarCard (`components/search/car-card.tsx`)**
-   - Vehicle preview cards
-   - Key information display
-   - Interactive hover states
-
-4. **CarDetail (`components/cars/car-detail.tsx`)**
-   - Detailed vehicle information
-   - Photo gallery
-   - Contact forms
-   - Specifications display
-
-5. **PhotoGallery (`components/cars/photo-gallery.tsx`)**
-   - Interactive image gallery
-   - Fullscreen mode
-   - Thumbnail navigation
-
-### Data Structure
+Representative listing interface:
 
 ```typescript
 interface CarListing {
@@ -103,27 +59,65 @@ interface CarListing {
 }
 ```
 
-## Features to be added
+## Project Structure
 
-1. Add auth to save my favorites
+```
+app/
+  page.tsx              # Landing experience
+  search/page.tsx       # Search & results surface
+  cars/[id]/page.tsx    # Vehicle detail route
+components/
+  search/               # Search, filters, and results modules
+  cars/                 # Detail experience components
+  ui/                   # Reusable shadcn/ui primitives
+lib/                    # Constants and utilities
+types/                  # Shared TypeScript definitions
+```
 
-2. Add a chatbot to search listings
+## Getting Started
 
-3. Schedule a test drive
+1. **Prerequisites** – Node.js 18+ and npm.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+3. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+4. Visit `http://localhost:3000` to explore the app.
 
-4. Checkout flow
+For production builds, run `npm run build` followed by `npm start`.
 
-5. Map view implementation
+## Available Scripts
 
-   - Dealer reviews
+- `npm run dev` – Start the Next.js development server.
+- `npm run build` – Create an optimized production build.
+- `npm start` – Serve the production build.
+- `npm run lint` – Execute Next.js linting with the configured ESLint ruleset.
+
+## Quality & Tooling
+
+- **TypeScript-first** – Strong typing across components and utilities.
+- **Tailwind CSS** – Utility-first styling with project-specific tokens.
+- **shadcn/ui & Radix** – Accessible headless primitives for consistent UX.
+- **ESLint** – Enforced via `npm run lint` to maintain code quality.
+
+## Roadmap
+
+- Account authentication and saved favorites.
+- Conversational chatbot to assist with inventory discovery.
+- End-to-end scheduling workflow for test drives.
+- Checkout pipeline to complete vehicle reservations.
+- Map view with dealer locations and review surfacing.
 
 ## Design Principles
 
 - Clean, modern interface
-- Responsive design
+- Responsive experience across devices
 - Accessibility-first approach
 - Progressive enhancement
-- Performance optimization
+- Performance-conscious rendering
 
 ## Technology Stack
 
