@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { Filters, type FiltersState } from "@/components/search/filters";
 import { ResultsView } from "@/components/search/results-view";
 import { Button } from "@/components/ui/button";
 import { BookmarkIcon, SlidersHorizontalIcon, ArrowLeft } from "lucide-react";
@@ -77,6 +78,7 @@ export function SearchResults() {
   const searchParams = useSearchParams();
   const [sortBy, setSortBy] = useState("price-asc");
   const [listings, setListings] = useState(MOCK_LISTINGS);
+  const [filters, setFilters] = useState<FiltersState | null>(null);
   const query = searchParams.get("q") || "";
 
   const handleSort = (value: string) => {
@@ -107,13 +109,75 @@ export function SearchResults() {
     console.log("Saving search:", { query, sortBy });
   };
 
-  const filteredListings = query
-    ? listings.filter(car => 
-        car.make.toLowerCase().includes(query.toLowerCase()) ||
-        car.model.toLowerCase().includes(query.toLowerCase()) ||
-        `${car.year}`.includes(query)
+  const handleFilterChange = (nextFilters: FiltersState) => {
+    setFilters(nextFilters);
+  };
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const queryFilteredListings = normalizedQuery
+    ? listings.filter(
+        (car) =>
+          car.make.toLowerCase().includes(normalizedQuery) ||
+          car.model.toLowerCase().includes(normalizedQuery) ||
+          `${car.year}`.includes(normalizedQuery)
       )
     : listings;
+
+  const filteredListings = queryFilteredListings.filter((car) => {
+    if (!filters) {
+      return true;
+    }
+
+    const {
+      make,
+      model,
+      minYear,
+      maxYear,
+      priceRange,
+      mileageRange,
+      bodyType,
+      fuelType,
+      location,
+    } = filters;
+
+    if (make && car.make.toLowerCase() !== make.toLowerCase()) {
+      return false;
+    }
+
+    if (model && !car.model.toLowerCase().includes(model.toLowerCase())) {
+      return false;
+    }
+
+    if (minYear && car.year < Number(minYear)) {
+      return false;
+    }
+
+    if (maxYear && car.year > Number(maxYear)) {
+      return false;
+    }
+
+    if (car.price < priceRange[0] || car.price > priceRange[1]) {
+      return false;
+    }
+
+    if (car.mileage < mileageRange[0] || car.mileage > mileageRange[1]) {
+      return false;
+    }
+
+    if (bodyType && car.bodyType.toLowerCase() !== bodyType.toLowerCase()) {
+      return false;
+    }
+
+    if (fuelType && car.fuelType.toLowerCase() !== fuelType.toLowerCase()) {
+      return false;
+    }
+
+    if (location && !car.location.toLowerCase().includes(location.toLowerCase())) {
+      return false;
+    }
+
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -157,7 +221,7 @@ export function SearchResults() {
                     Refine your car search with detailed filters
                   </SheetDescription>
                 </SheetHeader>
-                {/* Filter controls would go here */}
+                <Filters onFilterChange={handleFilterChange} />
               </SheetContent>
             </Sheet>
           </div>
