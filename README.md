@@ -23,6 +23,11 @@ A modern car sales application built with Next.js, TypeScript, and shadcn/ui. Th
   - List view with detailed cards
   - Map view (placeholder for future implementation)
 
+- **Filter Drawer**
+  - Slide-over filters panel
+  - Applies filters to search results in memory
+  - Reset filters in one click
+
 ### 3. Filtering System
 - **Available Filters**
   - Make and Model
@@ -32,6 +37,7 @@ A modern car sales application built with Next.js, TypeScript, and shadcn/ui. Th
   - Body Type
   - Fuel Type
   - Location
+  - Filter reset action
 
 ### 4. Vehicle Details
 - **Comprehensive Information**
@@ -67,18 +73,23 @@ A modern car sales application built with Next.js, TypeScript, and shadcn/ui. Th
    - Responsive grid layout
    - Sorting functionality
 
-3. **CarCard (`components/search/car-card.tsx`)**
+3. **Filters (`components/search/filters.tsx`)**
+   - Slide-over filter controls
+   - URL-driven initial values
+   - In-memory listing filtering
+
+4. **CarCard (`components/search/car-card.tsx`)**
    - Vehicle preview cards
    - Key information display
    - Interactive hover states
 
-4. **CarDetail (`components/cars/car-detail.tsx`)**
+5. **CarDetail (`components/cars/car-detail.tsx`)**
    - Detailed vehicle information
    - Photo gallery
    - Contact forms
    - Specifications display
 
-5. **PhotoGallery (`components/cars/photo-gallery.tsx`)**
+6. **PhotoGallery (`components/cars/photo-gallery.tsx`)**
    - Interactive image gallery
    - Fullscreen mode
    - Thumbnail navigation
